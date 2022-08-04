@@ -43,14 +43,13 @@
     const ambientLight = new THREE.AmbientLight();
     scene.add(ambientLight);
 
+    const pointLight = new THREE.PointLight();
+    pointLight.position.set(150, 200, 300);
+    scene.add(pointLight);
+
     //axes
     const axesHelper = new THREE.AxesHelper(150);
     scene.add(axesHelper);
-
-    const pointLight = new THREE.PointLight();
-    pointLight.position.set(150, 200, 300);
-
-    scene.add(pointLight);
 
     // visible point light
     const pointLightHelper = new THREE.PointLightHelper(pointLight, 10);
