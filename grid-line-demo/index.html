@@ -5,6 +5,11 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    body {
+      padding: 0;
+      margin: 0;
+    }
+
     #blocker {
       position: absolute;
       width: 100%;
@@ -25,6 +30,17 @@
       font-size: 14px;
       cursor: pointer;
     }
+
+    #crosshair {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+
+      user-select: none;
+      font-size: 3rem;
+      color: black;
+    }
   </style>
   <title>First Person Demo</title>
 </head>
@@ -35,6 +51,9 @@
     <div id="instructions">
       <p style="font-size: 36px;">Click to play</p>
     </div>
+  </div>
+
+  <div id="crosshair">
   </div>
 
   <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
@@ -65,9 +84,13 @@
     animate();
 
     function init() {
+
+      const crosshair = document.getElementById('crosshair');
+      crosshair.innerHTML = '+';
+      crosshair.style.display = 'none';
+
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
       camera.position.y = 10;
-
 
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0xffffff);
@@ -89,11 +112,13 @@
       controls.addEventListener('lock', () => {
         instructions.style.display = 'none';
         blocker.style.display = 'none';
+        crosshair.style.display = 'block';
       });
 
       controls.addEventListener('unlock', () => {
         blocker.style.display = 'block';
         instructions.style.display = '';
+        crosshair.style.display = 'none';
       });
 
       //floor
@@ -130,10 +155,24 @@
       const floor = new THREE.Mesh(floorGeometry, floorMaterial);
       scene.add(floor);
 
-      //
-      const geometry = new THREE.SphereGeometry(15, 32, 16);
-      const material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+      //object
+      const geometry = new THREE.SphereGeometry(10, 32, 16).toNonIndexed();
+      const colorSphere = [];
+
+      for (let i = 0, l = position.count; i < l; i++) {
+        color.setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
+        colorSphere.push(color.r, color.g, color.b);
+      }
+
+      geometry.setAttribute('color', new THREE.Float32BufferAttribute(colorSphere, 3));
+
+      const material = new THREE.MeshPhongMaterial({ specular: 0xffffff, flatShading: true, vertexColors: true });
+      material.color.setHSL(Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
       const sphere = new THREE.Mesh(geometry, material);
+      //randomly show up
+      sphere.position.x = Math.floor(Math.random() * 20 - 10) * 20;
+      sphere.position.y = Math.floor(Math.random() * 20) * 10 + 10;
+      sphere.position.z = Math.floor(Math.random() * 20 - 10) * 20;
       scene.add(sphere);
 
       // render
