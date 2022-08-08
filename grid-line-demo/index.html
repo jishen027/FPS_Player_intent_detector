@@ -179,10 +179,6 @@
     function aimObject() {
       raycaster.setFromCamera(pointer, camera);
       const intersects = raycaster.intersectObjects(scene.children);
-      if (intersects[0]) {
-        intersects[0].object.material.color.set(0xff0000);
-        console.log(intersects[0])
-      }
     }
 
     function onPointerMove(event) {
