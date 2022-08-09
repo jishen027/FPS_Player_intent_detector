@@ -7,7 +7,8 @@
     "dev": "vite"
   },
   "dependencies": {
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "three": "^0.143.0"
   },
   "devDependencies": {
     "vite": "^3.0.4"
