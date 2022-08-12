@@ -8,6 +8,7 @@
     "build": "vite build"
   },
   "dependencies": {
+    "dotenv": "^16.0.1",
     "firebase": "^9.9.2",
     "lodash": "^4.17.21",
     "three": "^0.143.0"

@@ -4,13 +4,15 @@ import { PointerLockControls } from './three_modules/PointerLockControls';
 
 import { initializeApp } from 'firebase/app';
 
+import 'dotenv/config';
+
 const firebaseConfig = {
-  apiKey: "AIzaSyClz8_9nwl6l5ReK4c44h_ajsDxYuf_VTw",
+  apiKey: process.env.API_KEY,
   authDomain: "three-js-demo-58da4.firebaseapp.com",
   projectId: "three-js-demo-58da4",
   storageBucket: "three-js-demo-58da4.appspot.com",
   messagingSenderId: "273050549481",
-  appId: "1:273050549481:web:c54af289a4a30ea7cb4478"
+  appId: process.env.APP_ID
 };
 
 
@@ -189,19 +191,13 @@ function gamepadControls() {
 }
 
 function rotateCamera(dx, dy) {
-  if (dx > 0.30) {
+  if (Math.abs(dx) > 0.30) {
     camera.rotateX(-dx * 0.02);
   }
-  if (dx < -0.30) {
-    camera.rotateX(-dx * 0.02);
-  }
-  if (dy < -0.30) {
+  if (Math.abs(dy) > 0.30) {
     camera.rotateY(-dy * 0.02);
   }
-  if (dy > 0.30) {
-    camera.rotateY(-dy * 0.02);
-  }
-
+  camera.position.z = 0;
 }
 
 window.addEventListener('resize', onWindowResize);
