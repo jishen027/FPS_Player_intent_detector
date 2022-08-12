@@ -1,0 +1,61 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+    }
+
+    #blocker {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    #instructions {
+      width: 100%;
+      height: 100%;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+
+      text-align: center;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    #crosshair {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+
+      user-select: none;
+      font-size: 3rem;
+      color: black;
+    }
+  </style>
+  <title>Document</title>
+  <script type="module" crossorigin src="/assets/index.9d0e2581.js"></script>
+</head>
+
+<body>
+  <div id="blocker">
+    <div id="instructions">
+      <p style="font-size: 36px;">Click to play</p>
+    </div>
+  </div>
+
+  <div id="crosshair">
+  </div>
+  
+</body>
+
+</html>

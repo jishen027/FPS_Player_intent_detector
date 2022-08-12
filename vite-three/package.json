@@ -4,9 +4,11 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "vite"
+    "dev": "vite",
+    "build": "vite build"
   },
   "dependencies": {
+    "firebase": "^9.9.2",
     "lodash": "^4.17.21",
     "three": "^0.143.0"
   },

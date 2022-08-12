@@ -1,10 +1,27 @@
 import * as THREE from 'three'
 
-import { PointerLockControls } from '../three-m-js/PointerLockControls';
+import { PointerLockControls } from './three_modules/PointerLockControls';
+
+import { initializeApp } from 'firebase/app';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyClz8_9nwl6l5ReK4c44h_ajsDxYuf_VTw",
+  authDomain: "three-js-demo-58da4.firebaseapp.com",
+  projectId: "three-js-demo-58da4",
+  storageBucket: "three-js-demo-58da4.appspot.com",
+  messagingSenderId: "273050549481",
+  appId: "1:273050549481:web:c54af289a4a30ea7cb4478"
+};
+
+
+const app = initializeApp(firebaseConfig);
+
 
 let controls, renderer, camera, scene, raycaster, pointer;
 
 let INTERSECTED;
+
+let gamepads, gamepad;
 
 init();
 animate();
@@ -16,7 +33,7 @@ function init() {
   crosshair.style.display = 'none';
 
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 2000);
-  camera.position.y = 10;
+  camera.position.set(0, 10, -1);
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0xffffff);
@@ -98,6 +115,7 @@ function animate() {
   aimObject();
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
+  gamepadControls();
 }
 
 function onPointerMove(event) {
@@ -142,6 +160,52 @@ function shootingAction(event) {
   }
 }
 
+// controllers
+function handleConnected(event) {
+  console.log("gamepads connected", event.gamepad);
+  console.log("firestore start");
+}
+
+function handleDisconnected(event) {
+  console.log("gamepad disconnected")
+}
+
+function gamepadControls() {
+  gamepads = navigator.getGamepads();
+  if (!gamepads[0]) return;
+  gamepad = gamepads[0];
+
+  const dx = gamepad.axes[1];
+  const dy = gamepad.axes[0];
+  console.log(dx, dy);
+
+  rotateCamera(dx, dy);
+
+  if (gamepad.buttons[7].pressed) {
+    shootingAction()
+  }
+
+
+}
+
+function rotateCamera(dx, dy) {
+  if (dx > 0.30) {
+    camera.rotateX(-dx * 0.02);
+  }
+  if (dx < -0.30) {
+    camera.rotateX(-dx * 0.02);
+  }
+  if (dy < -0.30) {
+    camera.rotateY(-dy * 0.02);
+  }
+  if (dy > 0.30) {
+    camera.rotateY(-dy * 0.02);
+  }
+
+}
+
 window.addEventListener('resize', onWindowResize);
 window.addEventListener('pointermove', onPointerMove);
 window.addEventListener('click', shootingAction);
+window.addEventListener('gamepadconnected', handleConnected);
+window.addEventListener('gamepaddisconnected', handleDisconnected);
