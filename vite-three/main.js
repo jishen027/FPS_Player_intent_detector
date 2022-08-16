@@ -1,10 +1,9 @@
 import * as THREE from 'three'
 
 import { PointerLockControls } from './three_modules/PointerLockControls';
-import { initializeApp } from 'firebase/app';
+// import { initializeApp } from 'firebase/app';
 
-// import dotenv from 'dotenv'
-// dotenv.config()
+
 
 // const firebaseConfig = {
 //   apiKey: "AIzaSyClz8_9nwl6l5ReK4c44h_ajsDxYuf_VTw",
@@ -92,6 +91,7 @@ function init() {
     transparent: true,
     opacity: 0.8
   });
+
   const sphere = new THREE.Mesh(geometry, material);
   sphere.position.x = Math.floor(Math.random() * 20 - 10) * 10;
   sphere.position.y = Math.floor(Math.random() * 20) * 10 + 10;
@@ -183,6 +183,7 @@ function gamepadControls() {
   const dy = gamepad.axes[2];
 
   rotateCamera(dx, dy);
+  dataCollect(dx, dy)
 
   if (gamepad.buttons[7].pressed) {
     shootingAction()
@@ -191,8 +192,6 @@ function gamepadControls() {
 
 function rotateCamera(dx, dy) {
   if (Math.abs(dx) > 0.05 || Math.abs(dy) > 0.05) {
-    console.log(dx, dy);
-
     _euler.setFromQuaternion(camera.quaternion);
 
     _euler.y -= dy * 0.05;
@@ -205,7 +204,26 @@ function rotateCamera(dx, dy) {
 }
 
 // data collecter
+// collect am array of coordinate data(dx, dy);
+// when then thumbstick return to the origin position, it means the end of the array data.
+let coordinateData = [];
 
+function dataCollect(dx, dy) {
+  //start recording
+  if (Math.abs(dx) > 0.05 && Math.abs(dy) > 0.05) {
+    coordinateData.push({ x: dx, y: dy });
+  }
+
+  if (Math.abs(dx) < 0.05 && Math.abs(dy) < 0.05) {
+    if (coordinateData.length !== 0) {
+      console.log("===========start print data ===================");
+      coordinateData.forEach((data) => {
+        console.log(data.x, data.y)
+      })
+      coordinateData = [];
+    }
+  }
+}
 
 window.addEventListener('resize', onWindowResize);
 window.addEventListener('pointermove', onPointerMove);
