@@ -1,29 +1,29 @@
 import * as THREE from 'three'
 
 import { PointerLockControls } from './three_modules/PointerLockControls';
-
 import { initializeApp } from 'firebase/app';
 
-import 'dotenv/config';
+// import dotenv from 'dotenv'
+// dotenv.config()
 
-const firebaseConfig = {
-  apiKey: process.env.API_KEY,
-  authDomain: "three-js-demo-58da4.firebaseapp.com",
-  projectId: "three-js-demo-58da4",
-  storageBucket: "three-js-demo-58da4.appspot.com",
-  messagingSenderId: "273050549481",
-  appId: process.env.APP_ID
-};
+// const firebaseConfig = {
+//   apiKey: "AIzaSyClz8_9nwl6l5ReK4c44h_ajsDxYuf_VTw",
+//   authDomain: "three-js-demo-58da4.firebaseapp.com",
+//   projectId: "three-js-demo-58da4",
+//   storageBucket: "three-js-demo-58da4.appspot.com",
+//   messagingSenderId: "273050549481",
+//   appId: "1:273050549481:web:c54af289a4a30ea7cb4478"
+// };
 
-
-const app = initializeApp(firebaseConfig);
-
+// const app = initializeApp(firebaseConfig);
 
 let controls, renderer, camera, scene, raycaster, pointer;
 
 let INTERSECTED;
 
 let gamepads, gamepad;
+
+let _euler;
 
 init();
 animate();
@@ -33,6 +33,8 @@ function init() {
   const crosshair = document.getElementById('crosshair');
   crosshair.innerHTML = '+';
   crosshair.style.display = 'none';
+  _euler = new THREE.Euler(0, 0, 0, 'YXZ');
+
 
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 2000);
   camera.position.set(0, 10, -1);
@@ -177,28 +179,33 @@ function gamepadControls() {
   if (!gamepads[0]) return;
   gamepad = gamepads[0];
 
-  const dx = gamepad.axes[1];
-  const dy = gamepad.axes[0];
-  console.log(dx, dy);
+  const dx = gamepad.axes[3];
+  const dy = gamepad.axes[2];
 
   rotateCamera(dx, dy);
 
   if (gamepad.buttons[7].pressed) {
     shootingAction()
   }
-
-
 }
 
 function rotateCamera(dx, dy) {
-  if (Math.abs(dx) > 0.30) {
-    camera.rotateX(-dx * 0.02);
+  if (Math.abs(dx) > 0.05 || Math.abs(dy) > 0.05) {
+    console.log(dx, dy);
+
+    _euler.setFromQuaternion(camera.quaternion);
+
+    _euler.y -= dy * 0.05;
+    _euler.x -= dx * 0.05;
+
+    _euler.x = Math.max(Math.PI / 2 - Math.PI, Math.min(Math.PI / 2 - 0, _euler.x));
+
+    camera.quaternion.setFromEuler(_euler);
   }
-  if (Math.abs(dy) > 0.30) {
-    camera.rotateY(-dy * 0.02);
-  }
-  camera.position.z = 0;
 }
+
+// data collecter
+
 
 window.addEventListener('resize', onWindowResize);
 window.addEventListener('pointermove', onPointerMove);
