@@ -1,20 +1,8 @@
 import * as THREE from 'three'
 
 import { PointerLockControls } from './three_modules/PointerLockControls';
-// import { initializeApp } from 'firebase/app';
-
-
-
-// const firebaseConfig = {
-//   apiKey: "AIzaSyClz8_9nwl6l5ReK4c44h_ajsDxYuf_VTw",
-//   authDomain: "three-js-demo-58da4.firebaseapp.com",
-//   projectId: "three-js-demo-58da4",
-//   storageBucket: "three-js-demo-58da4.appspot.com",
-//   messagingSenderId: "273050549481",
-//   appId: "1:273050549481:web:c54af289a4a30ea7cb4478"
-// };
-
-// const app = initializeApp(firebaseConfig);
+import { db, colRef } from './config';
+import { addDoc } from 'firebase/firestore'
 
 let controls, renderer, camera, scene, raycaster, pointer;
 
@@ -217,6 +205,14 @@ function dataCollect(dx, dy) {
   if (Math.abs(dx) < 0.05 && Math.abs(dy) < 0.05) {
     if (coordinateData.length !== 0) {
       console.log("===========start print data ===================");
+      addDoc(colRef, {
+        ArrayType: 0,
+        data: coordinateData
+      }).then((res) => {
+        console.log(res)
+      }).catch((err) => {
+        console.log(err)
+      })
       coordinateData.forEach((data) => {
         console.log(data.x, data.y)
       })

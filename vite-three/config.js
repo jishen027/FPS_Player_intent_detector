@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc } from './.firebase/firestore'
+import { getFirestore, collection } from 'firebase/firestore'
+
 const firebaseConfig = {
   apiKey: "AIzaSyClz8_9nwl6l5ReK4c44h_ajsDxYuf_VTw",
   authDomain: "three-js-demo-58da4.firebaseapp.com",
@@ -13,4 +14,4 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app)
 const colRef = collection(db, 'coordinateData');
 
-export { app, db, colRef };
+export { db, colRef };
