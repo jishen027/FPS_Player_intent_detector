@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 
 import { PointerLockControls } from './three_modules/PointerLockControls';
-import { db, colRef } from './config';
+import { colRef } from './config';
 import { addDoc } from 'firebase/firestore'
 
 let controls, renderer, camera, scene, raycaster, pointer;
@@ -22,9 +22,9 @@ function init() {
   crosshair.style.display = 'none';
   _euler = new THREE.Euler(0, 0, 0, 'YXZ');
 
-
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 2000);
-  camera.position.set(0, 10, -1);
+  camera.position.set(0, 10, 0);
+  camera.lookAt(0, 10, 0)
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0xffffff);
@@ -81,9 +81,12 @@ function init() {
   });
 
   const sphere = new THREE.Mesh(geometry, material);
-  sphere.position.x = Math.floor(Math.random() * 20 - 10) * 10;
-  sphere.position.y = Math.floor(Math.random() * 20) * 10 + 10;
-  sphere.position.z = Math.floor(Math.random() * 20 - 10) * 10;
+  // sphere.position.x = Math.floor(Math.random() * 20 - 10) * 10;
+  // sphere.position.y = Math.floor(Math.random() * 20) * 10 + 10;
+  // sphere.position.z = Math.floor(Math.random() * 20 - 10) * 10;
+  sphere.position.x = Math.floor((Math.random() * 200)) * (Math.random() < 0.5 ? -1 : 1); // -200 - 200
+  sphere.position.y = Math.floor((Math.random() * 150)); // 0 - 150
+  sphere.position.z = -200; // fixed
   scene.add(sphere);
 
   //raycaster
@@ -146,9 +149,9 @@ function shootingAction(event) {
   raycaster.setFromCamera({ x: 0, y: 0 }, camera);
   const intersects = raycaster.intersectObjects(scene.children, false);
   if (intersects.length > 0 && intersects[0].object instanceof THREE.Mesh) {
-    intersects[0].object.position.x = Math.floor(Math.random() * 20 - 10) * 10;
-    intersects[0].object.position.y = Math.floor(Math.random() * 20) * 10 + 10;
-    intersects[0].object.position.z = Math.floor(Math.random() * 20 - 10) * 10;
+    intersects[0].object.position.x = Math.floor((Math.random() * 200)) * (Math.random() < 0.5 ? -1 : 1);;
+    intersects[0].object.position.y = Math.floor((Math.random() * 150)); // 0 - 150;
+    intersects[0].object.position.z = -200;
   }
 }
 
@@ -211,7 +214,7 @@ function dataCollect(dx, dy) {
       }).then((res) => {
         console.log(res)
       }).catch((err) => {
-        console.log(err)
+        console.log(err.message)
       })
       coordinateData.forEach((data) => {
         console.log(data.x, data.y)
