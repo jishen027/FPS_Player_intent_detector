@@ -2,7 +2,8 @@ import * as THREE from 'three'
 
 import { PointerLockControls } from './three_modules/PointerLockControls';
 import { colRef } from './config';
-import { addDoc } from 'firebase/firestore'
+import { addDoc, getDocs } from 'firebase/firestore'
+import { saveCSV } from './dataprocessing';
 
 let controls, renderer, camera, scene, raycaster, pointer;
 
@@ -11,6 +12,8 @@ let INTERSECTED;
 let gamepads, gamepad;
 
 let _euler;
+
+var MODE_CODE = 0;
 
 init();
 animate();
@@ -145,6 +148,7 @@ function aimObject() {
     INTERSECTED = null;
   }
 }
+
 function shootingAction(event) {
   raycaster.setFromCamera({ x: 0, y: 0 }, camera);
   const intersects = raycaster.intersectObjects(scene.children, false);
@@ -207,22 +211,67 @@ function dataCollect(dx, dy) {
 
   if (Math.abs(dx) < 0.05 && Math.abs(dy) < 0.05) {
     if (coordinateData.length !== 0) {
-      console.log("===========start print data ===================");
-      addDoc(colRef, {
-        ArrayType: 0,
-        data: coordinateData
-      }).then((res) => {
-        console.log(res)
-      }).catch((err) => {
-        console.log(err.message)
-      })
-      coordinateData.forEach((data) => {
-        console.log(data.x, data.y)
-      })
+      if (coordinateData.length >= 5) {
+        console.log("===========start print data ===================");
+        addDoc(colRef, {
+          ArrayType: MODE_CODE,
+          data: coordinateData
+        }).then((res) => {
+          console.log(res)
+        }).catch((err) => {
+          console.log(err.message)
+        })
+        coordinateData.forEach((data) => {
+          console.log(MODE_CODE, data.x, data.y)
+        })
+      }
       coordinateData = [];
     }
   }
 }
+
+// change mode btn
+const changeMode = document.getElementById('change_mode');
+changeMode.addEventListener('click', (e) => {
+  e.preventDefault();
+
+  if (MODE_CODE == 0) {
+    MODE_CODE = 1;
+  } else {
+    MODE_CODE = 0;
+  }
+  console.log("MODE CODE:", MODE_CODE)
+})
+
+// output data
+function outputCSV() {
+  let title = 'test';
+  let head = ['dataType', 'axes'];
+  let docs = [];
+  let data = [];
+  let axes = [];
+  getDocs(colRef)
+    .then((snapshot) => {
+      snapshot.forEach((doc) => {
+        docs.push({ ...doc.data() });
+      })
+      console.log(docs);
+      docs.filter((data)=>{
+        return data.ArrayType == 1;
+      })
+    })
+    .catch(err => {
+      console.log(err.message);
+    })
+  // saveCSV(title, head, data);
+}
+
+const printCSV = document.getElementById('printCSV');
+printCSV.addEventListener('click', (e) => {
+  e.preventDefault();
+  outputCSV();
+})
+
 
 window.addEventListener('resize', onWindowResize);
 window.addEventListener('pointermove', onPointerMove);
