@@ -256,7 +256,7 @@ function outputCSV() {
         docs.push({ ...doc.data() });
       })
       console.log(docs);
-      docs.filter((data)=>{
+      docs.filter((data) => {
         return data.ArrayType == 1;
       })
     })
@@ -266,13 +266,12 @@ function outputCSV() {
   // saveCSV(title, head, data);
 }
 
+
 const printCSV = document.getElementById('printCSV');
 printCSV.addEventListener('click', (e) => {
   e.preventDefault();
   outputCSV();
 })
-
-
 window.addEventListener('resize', onWindowResize);
 window.addEventListener('pointermove', onPointerMove);
 window.addEventListener('click', shootingAction);
