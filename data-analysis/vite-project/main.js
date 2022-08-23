@@ -99,11 +99,15 @@ function setGraphOption(coordinateSeries, chart, chartTitle) {
   });
 }
 
-// Aiming action
-getData(0, myChart, myChart3, 'Aiming Action Samples');
+const fetchData = document.getElementById('FetchData');
+fetchData.addEventListener('click', (e) => {
+  e.preventDefault();
+  // Aiming action
+  getData(0, myChart, myChart3, 'Aiming Action Samples');
 
-// moving action
-getData(1, myChart2, myChart4, 'Moving Action Samples');
+  // moving action
+  getData(1, myChart2, myChart4, 'Moving Action Samples');
+});
 
 
 
