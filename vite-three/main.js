@@ -177,8 +177,13 @@ function gamepadControls() {
   const dx = gamepad.axes[3];
   const dy = gamepad.axes[2];
 
+  const rx = gamepad.axes[1];
+  const ry = gamepad.axes[0];
+
+  const trigger = gamepad.buttons[7].value;
+
   rotateCamera(dx, dy);
-  dataCollect(dx, dy)
+  dataCollect(dx, dy,  rx, ry, trigger);
 
   if (gamepad.buttons[7].pressed) {
     shootingAction()
@@ -203,26 +208,24 @@ function rotateCamera(dx, dy) {
 // when then thumbstick return to the origin position, it means the end of the array data.
 let coordinateData = [];
 
-function dataCollect(dx, dy) {
+function dataCollect(dx, dy, rx, ry, trigger) {
   //start recording
-  if (Math.abs(dx) > 0.05 && Math.abs(dy) > 0.05) {
-    coordinateData.push({ x: dx, y: dy });
+  if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1 || Math.abs(rx) > 0.1 || Math.abs(ry) > 0.1) {
+    console.log("============= Start record data ======================= ");
+    console.log(dx, dy, rx, ry, trigger)
+    coordinateData.push({ x: dx, y: dy, rx: rx, ry: ry, trigger: trigger });
   }
 
-  if (Math.abs(dx) < 0.05 && Math.abs(dy) < 0.05) {
+  if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1 && Math.abs(rx) < 0.1 && Math.abs(ry) < 0.1) {
     if (coordinateData.length !== 0) {
       if (coordinateData.length >= 5) {
         console.log("===========start print data ===================");
         addDoc(colRef, {
-          ArrayType: MODE_CODE,
           data: coordinateData
         }).then((res) => {
           console.log(res)
         }).catch((err) => {
           console.log(err.message)
-        })
-        coordinateData.forEach((data) => {
-          console.log(MODE_CODE, data.x, data.y)
         })
       }
       coordinateData = [];
