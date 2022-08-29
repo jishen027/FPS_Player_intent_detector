@@ -1,31 +1,24 @@
-import * as echart from 'echarts';
-
-import { getDocs } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { colRef } from './firebase-config'
 import { saveCSV } from './dataprocessing';
 
+const AIMING_ACTION = 0;
+const MOVING_ACTION = 1;
+
 //get Data from firestore
-
-var myChart = echart.init(document.getElementById('main'));
-var myChart2 = echart.init(document.getElementById('main2'));
-var myChart3 = echart.init(document.getElementById('main3'));
-var myChart4 = echart.init(document.getElementById('main4'));
-
 function getData() {
-  let collection = [];
   let data = [];
-  let line = [];
-  let point = [];
+  let elements = [];
+  let element = "";
+  let _line_data = [];
+  let _collection = [];
 
-  let mata_0 = [];
-  let mata_1 = [];
-  let centerPoint = [];
-  let lineCenterPoints = [];
+  let _center_point = [];
 
-  let total_x = 0, total_y = 0, total_rx = 0, total_ry = 0;
-  let total_x_0 = 0, total_y_0 = 0, total_rx_0 = 0, total_ry_0 = 0;
-  let counter_0 = 0, counter_1 = 0;
-
+  let mean_x = 0, mean_y = 0, mean_rx = 0, mean_ry = 0;
+  let sum_x = 0, sum_y = 0, sum_rx = 0, sum_ry = 0;
+  let counter = 0;
+  let type = 0;
 
 
   getDocs(colRef)
@@ -33,87 +26,72 @@ function getData() {
       snapshot.forEach((doc) => {
         data.push(doc.data())
       })
-      data.forEach((elements) => {
-        elements.data.forEach((element, index) => {
-          point.push(element.x)
-          point.push(element.y)
-          point.push(element.rx)
-          point.push(element.ry)
-          point.push(element.trigger)
-          line.push(point)
-          point = [];
-
-
-          if (element.trigger > 0) {
-            total_x += element.x;
-            total_y += element.y;
-            total_rx += element.rx;
-            total_ry += element.ry;
-            counter_1++;
-          } else {
-            total_x_0 += element.x;
-            total_y_0 += element.y;
-            total_rx_0 += element.rx;
-            total_ry_0 += element.ry;
-            counter_0++;
-          }
-
+      console.log(data);
+      for (let i = 0; i < data.length; i++) {
+        elements = data[i].data;
+        if (elements.some(isGreaterThreshold)) {
+          elements = elements.map((element) => {
+            element.type = AIMING_ACTION;
+          })
+        }
+        elements.forEach((element) => {
+          sum_x += element.x;
+          sum_y += element.y;
+          sum_rx += element.rx;
+          sum_ry += element.ry;
+          type = element.type;
         })
-        collection.push(line)
-        line = [];
+        counter = elements.length
 
-        mata_0.push(total_x_0 / counter_0);
-        mata_0.push(total_y_0 / counter_0);
-        mata_0.push(total_rx_0 / counter_0);
-        mata_0.push(total_ry_0 / counter_0);
-        mata_1.push(total_x / counter_1);
-        mata_1.push(total_y / counter_1);
-        mata_1.push(total_rx / counter_1);
-        mata_1.push(total_ry / counter_1);
-        centerPoint.push(mata_0);
-        centerPoint.push(mata_1);
-        lineCenterPoints.push(centerPoint);
-        mata_0 = [];
-        mata_1 = [];
-        centerPoint = [];
-      })
-      console.log(collection);
-      console.log(lineCenterPoints);
+        mean_x = sum_x / counter;
+        mean_y = sum_y / counter;
+        mean_rx = sum_rx / counter;
+        mean_ry = sum_ry / counter;
 
-      let collection_points = []
-      let col_point = []
 
-      lineCenterPoints.forEach((element) => {
-        col_point.push(element[0][0])
-        col_point.push(element[0][1])
-        col_point.push(element[0][2])
-        col_point.push(element[0][3])
-        col_point.push(0)
-        collection_points.push(col_point)
-        col_point = []
-        col_point.push(element[1][0])
-        col_point.push(element[1][1])
-        col_point.push(element[1][2])
-        col_point.push(element[1][3])
-        col_point.push(1)
-        collection_points.push(col_point)
-        col_point = []
-      })
 
-      console.log(collection_points);
+
+        counter = 0;
+
+        _center_point.push(mean_x);
+        _center_point.push(mean_y);
+        _center_point.push(mean_rx);
+        _center_point.push(mean_ry);
+        _center_point.push(type);
+
+        sum_x = 0;
+        sum_y = 0;
+        sum_rx = 0;
+        sum_ry = 0;
+
+        mean_x = 0;
+        mean_y = 0;
+        mean_rx = 0;
+        mean_ry = 0;
+
+        _collection.push(_center_point);
+        _center_point = [];
+      }
+
+      console.log(_collection);
 
       // output CSV
       let csvTitle = 'ControllerData';
-      let head = ['x','y','rx','ry','type'];
-      let csvData = collection_points;
+      let head = ['x', 'y', 'rx', 'ry', 'type'];
+      let csvData = _collection;
 
       saveCSV(csvTitle, head, csvData).then(() => {
         console.log('success');
       })
+
     })
     .catch(err => {
       console.log(err.message);
     })
+}
+
+const isGreaterThreshold = (currentElement) => {
+  currentElement.trigger > 0.1;
 }
 
 //set option

@@ -3,7 +3,6 @@ import * as THREE from 'three'
 import { PointerLockControls } from './three_modules/PointerLockControls';
 import { colRef } from './config';
 import { addDoc, getDocs } from 'firebase/firestore'
-import { saveCSV } from './dataprocessing';
 
 let controls, renderer, camera, scene, raycaster, pointer;
 
@@ -183,7 +182,7 @@ function gamepadControls() {
   const trigger = gamepad.buttons[7].value;
 
   rotateCamera(dx, dy);
-  dataCollect(dx, dy,  rx, ry, trigger);
+  dataCollect(dx, dy, rx, ry, trigger);
 
   if (gamepad.buttons[7].pressed) {
     shootingAction()
@@ -207,74 +206,56 @@ function rotateCamera(dx, dy) {
 // collect am array of coordinate data(dx, dy);
 // when then thumbstick return to the origin position, it means the end of the array data.
 let coordinateData = [];
+let temp_coordinate_data = [];
+const AIMING_ACTION = 0;
+const MOVING_ACTION = 1;
 
 function dataCollect(dx, dy, rx, ry, trigger) {
   //start recording
-  if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1 || Math.abs(rx) > 0.1 || Math.abs(ry) > 0.1) {
-    console.log("============= Start record data ======================= ");
-    console.log(dx, dy, rx, ry, trigger)
-    coordinateData.push({ x: dx, y: dy, rx: rx, ry: ry, trigger: trigger });
+  if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) {
+    console.log("============= Start record Moving data ======================= ");
+    temp_coordinate_data.push({ x: dx, y: dy, rx: rx, ry: ry, trigger: trigger, type: MOVING_ACTION })
   }
 
-  if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1 && Math.abs(rx) < 0.1 && Math.abs(ry) < 0.1) {
-    if (coordinateData.length !== 0) {
-      if (coordinateData.length >= 5) {
-        console.log("===========start print data ===================");
-        addDoc(colRef, {
-          data: coordinateData
-        }).then((res) => {
-          console.log(res)
-        }).catch((err) => {
-          console.log(err.message)
-        })
-      }
+  // stop 
+  if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1 && temp_coordinate_data.length != 0) {
+
+    if (coordinateData != 0) {
+      _upload_data(coordinateData);
+      coordinateData = temp_coordinate_data;
+      temp_coordinate_data = [];
+    } else {
+      coordinateData = temp_coordinate_data;
+      temp_coordinate_data = [];
+    }
+  }
+
+  // stop by trigger
+  if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1 && trigger > 0) {
+    console.log("============= Start record Aiming data ======================= ");
+    if (coordinateData.length != 0) {
+      coordinateData.forEach((coordinate) => {
+        coordinate.type = AIMING_ACTION;
+      });
+      _upload_data(coordinateData);
       coordinateData = [];
     }
   }
+
+
 }
 
-// change mode btn
-const changeMode = document.getElementById('change_mode');
-changeMode.addEventListener('click', (e) => {
-  e.preventDefault();
-
-  if (MODE_CODE == 0) {
-    MODE_CODE = 1;
-  } else {
-    MODE_CODE = 0;
-  }
-  console.log("MODE CODE:", MODE_CODE)
-})
-
-// output data
-function outputCSV() {
-  let title = 'test';
-  let head = ['dataType', 'axes'];
-  let docs = [];
-  let data = [];
-  let axes = [];
-  getDocs(colRef)
-    .then((snapshot) => {
-      snapshot.forEach((doc) => {
-        docs.push({ ...doc.data() });
-      })
-      console.log(docs);
-      docs.filter((data) => {
-        return data.ArrayType == 1;
-      })
-    })
-    .catch(err => {
-      console.log(err.message);
-    })
-  // saveCSV(title, head, data);
+function _upload_data(coordinateData) {
+  console.log(coordinateData);
+  addDoc(colRef, {
+    data: coordinateData
+  }).then((res) => {
+    console.log(res)
+  }).catch((err) => {
+    console.log(err.message)
+  })
 }
 
-
-const printCSV = document.getElementById('printCSV');
-printCSV.addEventListener('click', (e) => {
-  e.preventDefault();
-  outputCSV();
-})
 window.addEventListener('resize', onWindowResize);
 window.addEventListener('pointermove', onPointerMove);
 window.addEventListener('click', shootingAction);
