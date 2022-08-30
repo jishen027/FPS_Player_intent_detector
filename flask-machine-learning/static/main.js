@@ -22,6 +22,7 @@ const startPredict = () => {
 }
 
 const animate = () => {
+  gamepadControls()
   requestAnimationFrame(animate)
 }
 
@@ -38,9 +39,118 @@ const gamepadControls = () => {
 
   const trigger = gamepad.buttons[7].value;
 
-  // dataCollect(dx, dy, rx, ry, trigger);
+
+  dataCollect(dx, dy, rx, ry, trigger);
 }
+
+let coordinateData = [];
+let temp_coordinate_data = [];
+const AIMING_ACTION = 0;
+const MOVING_ACTION = 1;
 
 const dataCollect = (dx, dy, rx, ry, trigger) => {
+  //start recording
+  if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) {
+    console.log("============= Start record Moving data ======================= ");
+    temp_coordinate_data.push({ x: dx, y: dy, rx: rx, ry: ry, trigger: trigger, type: MOVING_ACTION })
+  }
+
+  // stop 
+  if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1 && temp_coordinate_data.length != 0) {
+
+    if (coordinateData != 0) {
+      // _upload_data(coordinateData);
+      _dataprocessing(coordinateData)
+      coordinateData = temp_coordinate_data;
+      temp_coordinate_data = [];
+    } else {
+      coordinateData = temp_coordinate_data;
+      temp_coordinate_data = [];
+    }
+  }
+
+  // stop by trigger
+  if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1 && trigger > 0) {
+    console.log("============= Start record Aiming data ======================= ");
+    if (coordinateData.length != 0) {
+      coordinateData.forEach((coordinate) => {
+        coordinate.type = AIMING_ACTION;
+      });
+      // _upload_data(coordinateData);
+      _dataprocessing(coordinateData)
+      coordinateData = [];
+    }
+  }
 }
 
+
+let mean_x = 0, mean_y = 0, mean_rx = 0, mean_ry = 0;
+let sum_x = 0, sum_y = 0, sum_rx = 0, sum_ry = 0;
+let counter = 0;
+let data = []
+let center_point = []
+
+const _dataprocessing = (coordinates) => {
+  console.log("data in data processing: ", coordinates)
+
+  coordinates.forEach((coordinate) => {
+    sum_x += coordinate.x;
+    sum_y += coordinate.y;
+    sum_rx += coordinate.rx;
+    sum_ry += coordinate.ry;
+  })
+  counter = coordinates.length;
+  console.log(counter)
+
+  mean_x = sum_x / counter;
+  mean_y = sum_y / counter;
+  mean_rx = sum_rx / counter;
+  mean_ry = sum_ry / counter;
+
+  center_point.push(mean_x.toFixed(4).toString())
+  center_point.push(mean_y.toFixed(4).toString())
+  center_point.push(mean_rx.toFixed(4).toString())
+  center_point.push(mean_ry.toFixed(4).toString())
+
+  data.push(center_point)
+
+  const result_data = postData(data);
+  console.log("in data processing", result_data)
+
+  sum_x = 0;
+  sum_y = 0;
+  sum_rx = 0;
+  sum_ry = 0;
+
+  mean_x = 0;
+  mean_y = 0;
+  mean_rx = 0;
+  mean_ry = 0;
+
+  data = []
+  center_point = []
+
+}
+
+const postData = async (data) => {
+  console.log("data in post data", data)
+  const response = await fetch('/predict', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data)
+  });
+
+  const result = await response.json();
+  console.log(result);
+  return result
+}
+
+const startPredictBtn = document.getElementById('start_predict')
+startPredictBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  console.log("clicked!");
+  startPredict();
+  // postData([[0.1, 0.1, 0.1, 0.1]]);
+})
