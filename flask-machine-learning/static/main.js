@@ -91,7 +91,6 @@ let data = []
 let center_point = []
 
 const _dataprocessing = (coordinates) => {
-  console.log("data in data processing: ", coordinates)
 
   coordinates.forEach((coordinate) => {
     sum_x += coordinate.x;
@@ -100,7 +99,6 @@ const _dataprocessing = (coordinates) => {
     sum_ry += coordinate.ry;
   })
   counter = coordinates.length;
-  console.log(counter)
 
   mean_x = sum_x / counter;
   mean_y = sum_y / counter;
@@ -115,7 +113,6 @@ const _dataprocessing = (coordinates) => {
   data.push(center_point)
 
   const result_data = postData(data);
-  console.log("in data processing", result_data)
 
   sum_x = 0;
   sum_y = 0;
@@ -132,8 +129,9 @@ const _dataprocessing = (coordinates) => {
 
 }
 
+const h1_title = document.getElementById('title')
+
 const postData = async (data) => {
-  console.log("data in post data", data)
   const response = await fetch('/predict', {
     method: 'POST',
     headers: {
@@ -143,14 +141,22 @@ const postData = async (data) => {
   });
 
   const result = await response.json();
-  console.log(result);
-  return result
+  console.log(result)
+
+  if(result.result == 1){
+    title.innerHTML = "Player Action : Moving"
+    title.style.color = 'red'
+  }
+
+  if(result.result == 0){
+    title.innerHTML = "Player Action : Aiming"
+    title.style.color = 'blue'
+  }
 }
 
 const startPredictBtn = document.getElementById('start_predict')
 startPredictBtn.addEventListener('click', (e) => {
   e.preventDefault();
-  console.log("clicked!");
   startPredict();
   // postData([[0.1, 0.1, 0.1, 0.1]]);
 })

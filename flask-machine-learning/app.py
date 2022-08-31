@@ -6,7 +6,7 @@ import pickle
 
 app = Flask(__name__)
 
-model = pickle.load(open('models/log_reg', 'rb'))
+model = pickle.load(open('models/poly_log_reg.pkl', 'rb'))
 # result = model.predict([["-0.4380491643116392","-0.22548256454796628","0.28404146638409844","0.8639126769427595"]])
 # print(result)
 

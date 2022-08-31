@@ -20,7 +20,6 @@ function getData() {
   let counter = 0;
   let type = 0;
 
-
   getDocs(colRef)
     .then((snapshot) => {
       snapshot.forEach((doc) => {
@@ -29,11 +28,6 @@ function getData() {
       console.log(data);
       for (let i = 0; i < data.length; i++) {
         elements = data[i].data;
-        if (elements.some(isGreaterThreshold)) {
-          elements = elements.map((element) => {
-            element.type = AIMING_ACTION;
-          })
-        }
         elements.forEach((element) => {
           sum_x += element.x;
           sum_y += element.y;
@@ -47,9 +41,6 @@ function getData() {
         mean_y = sum_y / counter;
         mean_rx = sum_rx / counter;
         mean_ry = sum_ry / counter;
-
-
-
 
         counter = 0;
 
