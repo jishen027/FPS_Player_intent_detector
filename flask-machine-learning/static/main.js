@@ -10,12 +10,33 @@ const handleGamepadDisconnected = () => {
 
 window.addEventListener('gamepadconnected', (e) => {
   handleGamepadConnected();
+  DetectionGamepadConnected();
 })
 
 window.addEventListener('gamepaddisconnected', (e) => {
   handleGamepadDisconnected();
+  DetectionGamepadDisconnected();
 })
 
+const detectionGamepadConnected = document.getElementById('gamepad-connected');
+const detectionGamepadDisconnected = document.getElementById('gamepad-disconnected');
+const h1_title = document.getElementById('title');
+const startPredictBtn = document.getElementById('start_predict');
+const stopPredictBtn = document.getElementById('stop_predict');
+
+
+// UI settings 
+const DetectionGamepadConnected = () => {
+  detectionGamepadConnected.style.display = 'block';
+  detectionGamepadDisconnected.style.display = 'none';
+}
+
+const DetectionGamepadDisconnected = () => {
+  detectionGamepadConnected.style.display = 'none';
+  detectionGamepadDisconnected.style.display = 'block';
+}
+
+let requestAnimationId;
 //start prediction 
 const startPredict = () => {
   animate()
@@ -23,7 +44,7 @@ const startPredict = () => {
 
 const animate = () => {
   gamepadControls()
-  requestAnimationFrame(animate)
+  requestAnimationId = requestAnimationFrame(animate);
 }
 
 const gamepadControls = () => {
@@ -57,28 +78,16 @@ const dataCollect = (dx, dy, rx, ry, trigger) => {
 
   // stop 
   if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1 && temp_coordinate_data.length != 0) {
-
-    if (coordinateData != 0) {
-      // _upload_data(coordinateData);
-      _dataprocessing(coordinateData)
-      coordinateData = temp_coordinate_data;
-      temp_coordinate_data = [];
-    } else {
-      coordinateData = temp_coordinate_data;
-      temp_coordinate_data = [];
-    }
+    _dataprocessing(temp_coordinate_data)
+    temp_coordinate_data = []
   }
 
   // stop by trigger
   if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1 && trigger > 0) {
     console.log("============= Start record Aiming data ======================= ");
-    if (coordinateData.length != 0) {
-      coordinateData.forEach((coordinate) => {
-        coordinate.type = AIMING_ACTION;
-      });
-      // _upload_data(coordinateData);
-      _dataprocessing(coordinateData)
-      coordinateData = [];
+    if (temp_coordinate_data.length != 0) {
+      _dataprocessing(temp_coordinate_data)
+      temp_coordinate_data = []
     }
   }
 }
@@ -129,7 +138,6 @@ const _dataprocessing = (coordinates) => {
 
 }
 
-const h1_title = document.getElementById('title')
 
 const postData = async (data) => {
   const response = await fetch('/predict', {
@@ -143,20 +151,29 @@ const postData = async (data) => {
   const result = await response.json();
   console.log(result)
 
-  if(result.result == 1){
+  if (result.result == 1) {
     title.innerHTML = "Player Action : Moving"
     title.style.color = 'red'
   }
 
-  if(result.result == 0){
+  if (result.result == 0) {
     title.innerHTML = "Player Action : Aiming"
     title.style.color = 'blue'
   }
 }
 
-const startPredictBtn = document.getElementById('start_predict')
 startPredictBtn.addEventListener('click', (e) => {
   e.preventDefault();
   startPredict();
+  startPredictBtn.style.display = 'none';
+  stopPredictBtn.style.display = 'block';
+  h1_title.style.display = 'block';
   // postData([[0.1, 0.1, 0.1, 0.1]]);
+})
+
+stopPredictBtn.addEventListener('click', (e) => {
+  startPredictBtn.style.display = 'block';
+  stopPredictBtn.style.display = 'none';
+  h1_title.style.display = 'none';
+  window.cancelAnimationFrame(requestAnimationId);
 })

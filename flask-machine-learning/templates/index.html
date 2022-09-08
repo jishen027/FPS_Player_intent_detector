@@ -4,13 +4,43 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
   <title>Prediction Aiming or Moveing</title>
 </head>
 
 <body>
-  <h1 id="title">You are currently </h1>
-  <button id="start_predict">Start Prediction</button>
+  <!-- <header>
+    <nav>
+      <a href="/">Detection</a>
+      <a href="/">Data Collection</a>
+      <h1>
+        <div>Game Controls</div>
+        <div>Controls</div>
+      </h1>
+      <a href="/">Data Preprocessing</a>
+      <a href="/">more info</a>
+    </nav>
+  </header> -->
+
+  <div class="container">
+    <!-- Detection -->
+    <div id="detection">
+      <div id="gamepad-connected" style="display: none;">
+        <h1 id="title" style="display: none;">You are currently </h1>
+        <button class="btn btn-primary" id="start_predict">Start Prediction</button>
+        <button class="btn btn-danger" style="display: none;" id="stop_predict">Stop</button>
+      </div>
+      <div id="gamepad-disconnected" style="display: block;">
+        <h1>Please connect gamepad</h1>
+      </div>
+    </div>
+  </div>
   <script src="{{ url_for('static', filename='main.js') }}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa"
+    crossorigin="anonymous"></script>
 </body>
 
 </html>
